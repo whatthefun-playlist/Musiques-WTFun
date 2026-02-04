@@ -77,6 +77,18 @@
       transition:transform .05s ease, box-shadow .2s ease;
     }
     .btn:active{transform:translateY(1px);box-shadow:0 0 0 6px rgba(170,0,255,.15);}
+
+    /* === MODIFS: carte spéciale + bouton rose === */
+    .card.special{
+      grid-column: 1 / -1;          /* force une nouvelle ligne + pleine largeur */
+    }
+
+    .btn.btn--pink{
+      background:#ff2db2;           /* rose */
+    }
+    .btn.btn--pink:active{
+      box-shadow:0 0 0 6px rgba(255,45,178,.18);
+    }
   </style>
 </head>
 <body>
@@ -101,6 +113,9 @@
   <script>
     const grid=document.getElementById('grid');
     let audios=[];
+
+    // Son spécial à mettre à part
+    const SPECIAL_SRC = 'sounds/19-intro-pierre-peniche.mp3';
 
     function fmt(t){
       if(!isFinite(t)||t<0)t=0;
@@ -131,6 +146,13 @@
       const title=node.querySelector('.title');
       const time=node.querySelector('.time');
       const play=node.querySelector('.play');
+
+      // Détecte la carte "spéciale"
+      const isSpecial = (track.src === SPECIAL_SRC);
+      if(isSpecial){
+        node.classList.add('special');   // met la carte sur une ligne dédiée en dessous
+        play.classList.add('btn--pink'); // bouton rose
+      }
 
       const start=parseStart(track.start||0);
       title.textContent=track.title||(track.src||'').split('/').pop().replace(/\.[^.]+$/,'');
