@@ -13,10 +13,10 @@
 
   { "title": "Aya Nakamura – Pookie", "file": "sounds/12-aya-nakamura-pookie.mp3", "type": "purple" },
   { "title": "R3HAB x Pelican – Loca Loca", "file": "sounds/13-r3hab-pelican-loca-loca.mp3", "type": "purple" },
-  { "title": "Wiz Khalifa – Black and Yellow", "file": "sounds/14-wiz-khalifa-black-and-yellow.mp3", "type": "purple" },
-  { "title": "Bruno Mars & ROSE – APT", "file": "sounds/15-bruno-mars-rose-apt.mp3", "type": "purple" },
+  { "title": "Wiz Khalifa – Black and Yellow", "file": "sounds/14-black-and-yellow.mp3", "type": "purple" },
+  { "title": "Bruno Mars & ROSE – APT", "file": "sounds/15-rose-bruno-mars-apt.mp3", "type": "purple" },
   { "title": "Sevdaliza – ALIBI", "file": "sounds/16-sevdaliza-alibi.mp3", "type": "purple" },
-  { "title": "Trinix & One-T – The Magic Key", "file": "sounds/17-trinix-one-t-the-magic-key.mp3", "type": "purple" },
+  { "title": "Trinix & One-T – The Magic Key", "file": "sounds/17-trinix-one-t-magic-key.mp3", "type": "purple" },
   { "title": "Theodora – Zou Bisou", "file": "sounds/18-theodora-zou-bisou.mp3", "type": "purple" },
 
   { "title": "Début spectacle", "file": "sounds/20-debut-spectacle.mp3", "type": "yellow" },
