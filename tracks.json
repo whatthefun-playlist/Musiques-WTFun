@@ -19,9 +19,9 @@
   { "title": "Trinix & One-T – The Magic Key", "file": "sounds/trinix-one-t-magic-key.mp3", "type": "purple" },
   { "title": "Theodora – Zou Bisou", "file": "sounds/theodora-zou-bisou.mp3", "type": "purple" },
 
-  { "title": "Début spectacle", "file": "sounds/debut-spectacle.mp3", "type": "yellow", "extraClass": "wide" },
-  { "title": "Remerciements humoristes", "file": "sounds/remerciements-humoristes.mp3", "type": "yellow", "extraClass": "wide" },
-  { "title": "Fin spectacle", "file": "sounds/fin-spectacle.mp3", "type": "yellow", "extraClass": "wide" },
+  { "title": "Début spectacle", "file": "sounds/debut-spectacle.mp3", "type": "yellow" },
+  { "title": "Remerciements humoristes", "file": "sounds/remerciements-humoristes.mp3", "type": "yellow" },
+  { "title": "Fin spectacle", "file": "sounds/fin-spectacle.mp3", "type": "yellow" },
 
-  { "title": "Intro Pierre – Péniche", "file": "sounds/19-intro-pierre-peniche.mp3", "type": "pink", "extraClass": "full" }
+  { "title": "Intro Pierre – Péniche", "file": "sounds/19-intro-pierre-peniche.mp3", "type": "pink" }
 ]
