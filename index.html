@@ -231,171 +231,162 @@
     <div class="status" id="status">Chargement des pistes…</div>
   </div>
 
-  <script>
-    const mainGrid = document.getElementById("playlist-main");
-    const liveGrid = document.getElementById("playlist-live");
-    const introGrid = document.getElementById("playlist-intro");
-    const statusEl = document.getElementById("status");
+ <script>
+  const mainGrid = document.getElementById("playlist-main");
+  const liveGrid = document.getElementById("playlist-live");
+  const introGrid = document.getElementById("playlist-intro");
+  const statusEl = document.getElementById("status");
 
-    const player = new Audio();
-    player.preload = "metadata";
+  const player = new Audio();
+  player.preload = "metadata";
 
-    let currentCard = null;
-    let currentTimeEl = null;
-    let currentDuration = 0;
-    let currentSrc = "";
+  let currentCard = null;
+  let currentTimeEl = null;
+  let currentDuration = 0;
+  let currentSrc = "";
 
-    function formatTime(seconds) {
-      if (!isFinite(seconds)) return "00:00";
-      const mins = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60);
-      return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
-    }
+  function formatTime(seconds) {
+    if (!isFinite(seconds)) return "00:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  }
 
-    function stopCurrentTrack() {
-      player.pause();
-      player.currentTime = 0;
+  function stopCurrentTrack() {
+    player.pause();
+    player.currentTime = 0;
 
-      if (currentCard) {
-        currentCard.classList.remove("playing");
-      }
+    if (currentCard) currentCard.classList.remove("playing");
+    if (currentTimeEl) currentTimeEl.textContent = `00:00 / ${formatTime(currentDuration)}`;
 
-      if (currentTimeEl) {
-        currentTimeEl.textContent = `00:00 / ${formatTime(currentDuration)}`;
-      }
+    currentCard = null;
+    currentTimeEl = null;
+    currentDuration = 0;
+    currentSrc = "";
+  }
 
-      currentCard = null;
-      currentTimeEl = null;
-      currentDuration = 0;
-      currentSrc = "";
-    }
+  function normalizeTrack(track) {
+    return {
+      title: track.title || track.name || "Sans titre",
+      file: track.file || track.src || "",
+      type: track.type || "purple"
+    };
+  }
 
-    function normalizeTrack(track) {
-      return {
-        title: track.title || track.name || "Sans titre",
-        file: track.file || track.src || "",
-        type: track.type || "purple"
-      };
-    }
+  function createTrackCard(rawTrack) {
+    const track = normalizeTrack(rawTrack);
 
-    function createTrackCard(rawTrack) {
-      const track = normalizeTrack(rawTrack);
+    const card = document.createElement("button");
+    card.className = `track ${track.type}`;
+    card.type = "button";
 
-      const card = document.createElement("button");
-      card.className = `track ${track.type}`;
-      card.type = "button";
+    const title = document.createElement("h3");
+    title.textContent = track.title;
 
-      const title = document.createElement("h3");
-      title.textContent = track.title;
+    const time = document.createElement("div");
+    time.className = "time";
+    time.textContent = "00:00 / ...";
 
-      const time = document.createElement("div");
-      time.className = "time";
-      time.textContent = "00:00 / --:--";
+    card.appendChild(title);
+    card.appendChild(time);
 
-      card.appendChild(title);
-      card.appendChild(time);
-
-      const tempAudio = new Audio(track.file);
-      tempAudio.preload = "metadata";
-      tempAudio.addEventListener("loadedmetadata", () => {
-        time.textContent = `00:00 / ${formatTime(tempAudio.duration)}`;
-      });
-
-      card.addEventListener("click", async () => {
-        try {
-          if (currentSrc === track.file) {
-            stopCurrentTrack();
-            return;
-          }
-
-          if (currentCard) {
-            stopCurrentTrack();
-          }
-
-          player.src = track.file;
-          player.currentTime = 0;
-          await player.play();
-
-          currentCard = card;
-          currentTimeEl = time;
-          currentSrc = track.file;
-          currentDuration = player.duration || tempAudio.duration || 0;
-
-          card.classList.add("playing");
-          time.textContent = `00:00 / ${formatTime(currentDuration)}`;
-        } catch (err) {
-          console.error("Erreur lecture audio :", err);
-        }
-      });
-
-      return card;
-    }
-
-    player.addEventListener("loadedmetadata", () => {
-      currentDuration = player.duration || 0;
-      if (currentTimeEl) {
-        currentTimeEl.textContent = `${formatTime(player.currentTime)} / ${formatTime(currentDuration)}`;
-      }
+    const probe = new Audio(track.file);
+    probe.preload = "metadata";
+    probe.addEventListener("loadedmetadata", () => {
+      time.textContent = `00:00 / ${formatTime(probe.duration)}`;
     });
-
-    player.addEventListener("timeupdate", () => {
-      if (currentTimeEl) {
-        currentTimeEl.textContent = `${formatTime(player.currentTime)} / ${formatTime(currentDuration)}`;
-      }
+    probe.addEventListener("error", () => {
+      time.textContent = "Fichier introuvable";
+      console.error("Erreur fichier audio :", track.file);
     });
+    probe.load();
 
-    player.addEventListener("ended", () => {
-      if (currentCard) {
-        currentCard.classList.remove("playing");
-      }
-      if (currentTimeEl) {
-        currentTimeEl.textContent = `00:00 / ${formatTime(currentDuration)}`;
-      }
-
-      currentCard = null;
-      currentTimeEl = null;
-      currentDuration = 0;
-      currentSrc = "";
-    });
-
-    async function loadTracks() {
+    card.addEventListener("click", async () => {
       try {
-        const response = await fetch("tracks.json");
-        if (!response.ok) {
-          throw new Error("Impossible de charger tracks.json");
+        if (currentSrc === track.file) {
+          stopCurrentTrack();
+          return;
         }
 
-        const data = await response.json();
-        const tracks = Array.isArray(data) ? data : data.tracks;
+        if (currentCard) stopCurrentTrack();
 
-        if (!Array.isArray(tracks) || tracks.length === 0) {
-          throw new Error("Aucune piste trouvée dans tracks.json");
-        }
+        player.src = track.file;
+        player.load();
+        await player.play();
 
-        mainGrid.innerHTML = "";
-        liveGrid.innerHTML = "";
-        introGrid.innerHTML = "";
+        currentCard = card;
+        currentTimeEl = time;
+        currentSrc = track.file;
+        currentDuration = player.duration || probe.duration || 0;
 
-        tracks.forEach(track => {
-          const card = createTrackCard(track);
-
-          if (track.type === "yellow") {
-            liveGrid.appendChild(card);
-          } else if (track.type === "pink") {
-            introGrid.appendChild(card);
-          } else {
-            mainGrid.appendChild(card);
-          }
-        });
-
-        statusEl.style.display = "none";
-      } catch (error) {
-        console.error(error);
-        statusEl.textContent = "Erreur de chargement de la playlist.";
+        card.classList.add("playing");
+        time.textContent = `00:00 / ${formatTime(currentDuration)}`;
+      } catch (err) {
+        console.error("Erreur lecture audio :", track.file, err);
+        time.textContent = "Impossible à lire";
       }
-    }
+    });
 
-    loadTracks();
-  </script>
-</body>
-</html>
+    return card;
+  }
+
+  player.addEventListener("loadedmetadata", () => {
+    currentDuration = player.duration || 0;
+    if (currentTimeEl) {
+      currentTimeEl.textContent = `${formatTime(player.currentTime)} / ${formatTime(currentDuration)}`;
+    }
+  });
+
+  player.addEventListener("timeupdate", () => {
+    if (currentTimeEl) {
+      currentTimeEl.textContent = `${formatTime(player.currentTime)} / ${formatTime(currentDuration)}`;
+    }
+  });
+
+  player.addEventListener("ended", () => {
+    if (currentCard) currentCard.classList.remove("playing");
+    if (currentTimeEl) currentTimeEl.textContent = `00:00 / ${formatTime(currentDuration)}`;
+
+    currentCard = null;
+    currentTimeEl = null;
+    currentDuration = 0;
+    currentSrc = "";
+  });
+
+  async function loadTracks() {
+    try {
+      const response = await fetch("tracks.json");
+      if (!response.ok) throw new Error("Impossible de charger tracks.json");
+
+      const data = await response.json();
+      const tracks = Array.isArray(data) ? data : data.tracks;
+
+      if (!Array.isArray(tracks) || tracks.length === 0) {
+        throw new Error("Aucune piste trouvée dans tracks.json");
+      }
+
+      mainGrid.innerHTML = "";
+      liveGrid.innerHTML = "";
+      introGrid.innerHTML = "";
+
+      tracks.forEach(track => {
+        const card = createTrackCard(track);
+
+        if (track.type === "yellow") {
+          liveGrid.appendChild(card);
+        } else if (track.type === "pink") {
+          introGrid.appendChild(card);
+        } else {
+          mainGrid.appendChild(card);
+        }
+      });
+
+      statusEl.style.display = "none";
+    } catch (error) {
+      console.error(error);
+      statusEl.textContent = "Erreur de chargement de la playlist.";
+    }
+  }
+
+  loadTracks();
+</script>
