@@ -148,7 +148,7 @@
 
     .track.playing {
       box-shadow:
-        0 0 0 3px rgba(17, 17, 17, 0.12),
+        0 0 0 3px rgba(17, 17, 17, 0.14),
         0 12px 30px rgba(0, 0, 0, 0.18);
       transform: translateY(-1px);
     }
@@ -237,9 +237,13 @@
     const introGrid = document.getElementById("playlist-intro");
     const statusEl = document.getElementById("status");
 
-    let currentAudio = null;
+    const player = new Audio();
+    player.preload = "metadata";
+
     let currentCard = null;
     let currentTimeEl = null;
+    let currentDuration = 0;
+    let currentSrc = "";
 
     function formatTime(seconds) {
       if (!isFinite(seconds)) return "00:00";
@@ -249,22 +253,21 @@
     }
 
     function stopCurrentTrack() {
-      if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
-      }
+      player.pause();
+      player.currentTime = 0;
 
       if (currentCard) {
         currentCard.classList.remove("playing");
       }
 
-      if (currentAudio && currentTimeEl) {
-        currentTimeEl.textContent = `00:00 / ${formatTime(currentAudio.duration)}`;
+      if (currentTimeEl) {
+        currentTimeEl.textContent = `00:00 / ${formatTime(currentDuration)}`;
       }
 
-      currentAudio = null;
       currentCard = null;
       currentTimeEl = null;
+      currentDuration = 0;
+      currentSrc = "";
     }
 
     function normalizeTrack(track) {
@@ -287,62 +290,73 @@
 
       const time = document.createElement("div");
       time.className = "time";
-      time.textContent = "00:00 / 00:00";
+      time.textContent = "00:00 / --:--";
 
-      const audio = document.createElement("audio");
-      audio.src = track.file;
-      audio.preload = "metadata";
+      card.appendChild(title);
+      card.appendChild(time);
 
-      audio.addEventListener("loadedmetadata", () => {
-        time.textContent = `00:00 / ${formatTime(audio.duration)}`;
-      });
-
-      audio.addEventListener("timeupdate", () => {
-        if (currentAudio === audio) {
-          time.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
-        }
-      });
-
-      audio.addEventListener("ended", () => {
-        card.classList.remove("playing");
-        time.textContent = `00:00 / ${formatTime(audio.duration)}`;
-
-        if (currentAudio === audio) {
-          currentAudio = null;
-          currentCard = null;
-          currentTimeEl = null;
-        }
+      const tempAudio = new Audio(track.file);
+      tempAudio.preload = "metadata";
+      tempAudio.addEventListener("loadedmetadata", () => {
+        time.textContent = `00:00 / ${formatTime(tempAudio.duration)}`;
       });
 
       card.addEventListener("click", async () => {
-        if (currentAudio && currentAudio !== audio) {
-          stopCurrentTrack();
-        }
-
-        if (currentAudio === audio) {
-          stopCurrentTrack();
-          return;
-        }
-
         try {
-          audio.currentTime = 0;
-          await audio.play();
+          if (currentSrc === track.file) {
+            stopCurrentTrack();
+            return;
+          }
 
-          currentAudio = audio;
+          if (currentCard) {
+            stopCurrentTrack();
+          }
+
+          player.src = track.file;
+          player.currentTime = 0;
+          await player.play();
+
           currentCard = card;
           currentTimeEl = time;
+          currentSrc = track.file;
+          currentDuration = player.duration || tempAudio.duration || 0;
+
           card.classList.add("playing");
+          time.textContent = `00:00 / ${formatTime(currentDuration)}`;
         } catch (err) {
           console.error("Erreur lecture audio :", err);
         }
       });
 
-      card.appendChild(title);
-      card.appendChild(time);
-      card.appendChild(audio);
-
       return card;
     }
+
+    player.addEventListener("loadedmetadata", () => {
+      currentDuration = player.duration || 0;
+      if (currentTimeEl) {
+        currentTimeEl.textContent = `${formatTime(player.currentTime)} / ${formatTime(currentDuration)}`;
+      }
+    });
+
+    player.addEventListener("timeupdate", () => {
+      if (currentTimeEl) {
+        currentTimeEl.textContent = `${formatTime(player.currentTime)} / ${formatTime(currentDuration)}`;
+      }
+    });
+
+    player.addEventListener("ended", () => {
+      if (currentCard) {
+        currentCard.classList.remove("playing");
+      }
+      if (currentTimeEl) {
+        currentTimeEl.textContent = `00:00 / ${formatTime(currentDuration)}`;
+      }
+
+      currentCard = null;
+      currentTimeEl = null;
+      currentDuration = 0;
+      currentSrc = "";
+    });
 
     async function loadTracks() {
       try {
