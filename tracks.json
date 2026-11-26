@@ -19,7 +19,12 @@
   { "title": "Trinix & One-T – The Magic Key", "file": "sounds/17-trinix-one-t-magic-key.mp3", "type": "purple" },
   { "title": "Theodora – Zou Bisou", "file": "sounds/18-theodora-zou-bisou.mp3", "type": "purple" },
   { "title": "Yeah Yeah Yeahs", "file": "sounds/23-yeah-yeah-yeahs.mp3", "type": "purple" },
-  
+
+  { "title": "Tiësto", "file": "sounds/24-tiesto.mp3", "type": "purple" },
+  { "title": "Queen – Don't Stop Me Now", "file": "sounds/25-queen-dont-stop-me-now.mp3", "type": "purple" },
+  { "title": "Black Eyed Peas", "file": "sounds/26-black-eyed-peas.mp3", "type": "purple" },
+  { "title": "Daft Punk – One More Time", "file": "sounds/27-one-more-time-daft-punk.mp3", "type": "purple" },
+
   { "title": "Début spectacle", "file": "sounds/20-debut-spectacle.mp3", "type": "yellow" },
   { "title": "Remerciements humoristes", "file": "sounds/21-remerciements-humoristes.mp3", "type": "yellow" },
   { "title": "Fin spectacle", "file": "sounds/22-fin-spectacle.mp3", "type": "yellow" }
